@@ -21,7 +21,7 @@ struct ServerRunner {
 impl ServerRunner {
     async fn run(addr: SocketAddr) -> Self {
         let handle = tokio::spawn(async move {
-            App::default().serve(&addr).await.unwrap();
+            App::default().serve(&addr).await.await.unwrap();
         });
         sleep(Duration::from_millis(10)).await;
         Self { handle }

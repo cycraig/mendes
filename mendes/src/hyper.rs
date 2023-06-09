@@ -10,7 +10,7 @@ use async_trait::async_trait;
 use futures_util::future::{ready, CatchUnwind, FutureExt, Map, Ready};
 use http::request::Parts;
 use http::{Request, Response, StatusCode};
-use hyper::server::conn::AddrStream;
+use hyper::server::conn::{AddrIncoming, AddrStream};
 use hyper::service::Service;
 
 use super::Application;
@@ -24,16 +24,14 @@ where
     A: Application<RequestBody = Body, ResponseBody = Body> + Send + Sync + 'static,
     A::Error: std::error::Error + Send + Sync,
 {
-    type Serve = Result<(), hyper::Error>;
+    type Serve = hyper::Server<AddrIncoming, ApplicationService<A>>;
 
-    async fn serve(self, addr: &SocketAddr) -> Result<(), hyper::Error> {
-        hyper::Server::bind(addr)
-            .serve(ApplicationService::new(self))
-            .await
+    async fn serve(self, addr: &SocketAddr) -> Self::Serve {
+        hyper::Server::bind(addr).serve(ApplicationService::new(self))
     }
 }
 
-struct ApplicationService<A>(Arc<A>);
+pub struct ApplicationService<A>(Arc<A>);
 
 impl<A: Application<RequestBody = Body, ResponseBody = Body>> ApplicationService<A> {
     fn new(app: A) -> Self {
@@ -64,7 +62,7 @@ where
     }
 }
 
-struct ConnectionService<A> {
+pub struct ConnectionService<A> {
     app: Arc<A>,
     addr: SocketAddr,
 }
