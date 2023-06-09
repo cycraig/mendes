@@ -689,7 +689,7 @@ impl From<&Error> for StatusCode {
 /// Extension trait for serving an `Application` on the given `SocketAddr`
 #[async_trait]
 pub trait Server: Application {
-    type ServerError;
+    type Serve;
 
-    async fn serve(self, addr: &SocketAddr) -> Result<(), Self::ServerError>;
+    async fn serve(self, addr: &SocketAddr) -> Self::Serve;
 }

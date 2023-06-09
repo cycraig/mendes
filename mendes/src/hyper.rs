@@ -24,7 +24,7 @@ where
     A: Application<RequestBody = Body, ResponseBody = Body> + Send + Sync + 'static,
     A::Error: std::error::Error + Send + Sync,
 {
-    type ServerError = hyper::Error;
+    type Serve = Result<(), hyper::Error>;
 
     async fn serve(self, addr: &SocketAddr) -> Result<(), hyper::Error> {
         hyper::Server::bind(addr)
